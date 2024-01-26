@@ -1,46 +1,28 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require("express");
+const app = express();
+const PORT = 4000;
+const cors = require("cors")
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const phonesData = require("./data/phones.json");
 
-var app = express();
-
-var cors = require('cors');
-var mongoose = require('mongoose')
-
-app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.set('trust proxy', 1);
-app.enable('trust proxy');
+app.use(cors());
 
-app.use(
-    cors({
-      origin: [process.env.REACT_APP_URI]  // <== URL of our future React app
-    })
-  );
-
-app.use('/', indexRouter);
-// app.use('/users', usersRouter);
+// Route to get all phones
 app.get("/phones", (req, res) => {
-    res.json(phones);
-  });
+  res.json(phonesData);
+});
+
+// Route to get phone details by id
+app.get('/phones/:phoneId', function(req, res, next){
+    const { phoneId } = req.params;
+    return res.status(200).json(phonesData.find((phone) => phone.id === Number(phoneId)));
+});
 
 
-
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then((x) => {
-    console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
-  })
-  .catch((err) => {
-    console.error("Error connecting to mongo: ", err);
-  });
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`);
+//   });
 
 module.exports = app;
